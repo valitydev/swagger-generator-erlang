@@ -10,12 +10,13 @@
 
 %%
 
-%% IMPORTANT (TODO): Please not that form_data is not supported here
+%% IMPORTANT (TODO): Please not that form_data is not supported
 -type param_source() ::
     qs_val  |
     binding |
     header  |
-    body.
+    body    |
+    form_data.
 
 -type request_spec() :: [{
     {{packageName}}:param_name(),
@@ -213,7 +214,9 @@ get_value(header, Name, Req) ->
     {ok, maps:get({{packageName}}_utils:to_header(Name), Headers, undefined), Req};
 get_value(binding, Name, Req) ->
     Bindings = cowboy_req:bindings(Req),
-    {ok, maps:get({{packageName}}_utils:to_binding(Name), Bindings, undefined), Req}.
+    {ok, maps:get({{packageName}}_utils:to_binding(Name), Bindings, undefined), Req};
+get_value(form_data, Name, _Req) ->
+    erlang:error({unsupported_param_type, {Name, form_data}}).
 
 -spec decode_body(Body :: binary()) ->
     {ok,    Decoded :: {{packageName}}:object() | undefined} |

@@ -72,6 +72,8 @@ allowed_methods(Req, State) ->
     }.
 {{#operations}}{{#operation}}
 {{#hasAuthMethods}}
+{{#authMethods}}
+{{#isApiKey}}
 is_authorized(
     Req0,
     State = #state{
@@ -80,8 +82,6 @@ is_authorized(
         context       = Context
     }
 ) ->
-{{#authMethods}}
-  {{#isApiKey}}
     From = {{#isKeyInQuery}}qs_val{{/isKeyInQuery}}{{#isKeyInHeader}}header{{/isKeyInHeader}},
     Result = {{packageName}}_handler_api:authorize_api_key(
         LogicHandler,
@@ -100,7 +100,17 @@ is_authorized(
         {false, AuthHeader, Req} ->
             {{false, AuthHeader}, Req, State}
     end;
-  {{/isApiKey}}
+{{/isApiKey}}
+{{^isApiKey}}
+is_authorized(
+    Req0,
+    State = #state{
+        operation_id  = '{{operationId}}' = OperationID
+    }
+) ->
+    _ = error_logger:error_msg("Auth method {{name}} in ~p is not supported!", [OperationID]),
+    {{false, <<"">>}, Req0, State};
+{{/isApiKey}}
 {{/authMethods}}
 {{/hasAuthMethods}}
 {{^hasAuthMethods}}

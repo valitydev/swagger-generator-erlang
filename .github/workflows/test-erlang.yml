@@ -61,7 +61,7 @@ jobs:
     needs: [ generate ]
     runs-on: ubuntu-latest
     steps:
-      - name: Download codegen cli
+      - name: Download code artifact
         uses: actions/download-artifact@v2
         with:
           name: erlang-client
@@ -79,7 +79,7 @@ jobs:
     needs: [ generate ]
     runs-on: ubuntu-latest
     steps:
-      - name: Download codegen cli
+      - name: Download code artifact
         uses: actions/download-artifact@v2
         with:
           name: erlang-server

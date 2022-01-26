@@ -24,7 +24,8 @@
     qs_val  |
     binding |
     header  |
-    body.
+    body    |
+    form_data.
 
 -type request_spec() :: [{
     {{packageName}}:param_name(),
@@ -121,7 +122,9 @@ get_value(header, Name, Params) ->
     get_opt({{packageName}}_utils:to_binary(Name), HeaderParams);
 get_value(binding, Name, Params) ->
     BindingParams = maps:get(binding, Params),
-    get_opt({{packageName}}_utils:to_binary(Name), BindingParams).
+    get_opt({{packageName}}_utils:to_binary(Name), BindingParams);
+get_value(form_data, Name, _Params) ->
+    erlang:error({unsupported_param_type, {Name, form_data}}).
 
 get_opt(Key, Opts) ->
     get_opt(Key, Opts, undefined).
