@@ -1,0 +1,94 @@
+name: Test Erlang
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'epic/**'
+  pull_request:
+    branches: [ '**' ]
+
+env:
+  JAVA_VERSION: 11
+  OTP_VERSION: "24.2.0"
+  REBAR_VERSION: "3.18"
+  CODEGEN_VERSION: "2.4.25"
+  CODEGEN_NAME: "swagger-codegen-cli.jar"
+  ARTIFACT_NAME: "vality-erlang-codegen-swagger-codegen-1.0.0.jar"
+  SPEC_URL: "https://petstore.swagger.io/v2/swagger.json"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
+
+      - name: Get Codegen
+        run: |
+          mkdir codegen-cli
+          echo "DOWNLOADING ${{ env.CODEGEN_VERSION }}"
+          wget https://repo1.maven.org/maven2/io/swagger/swagger-codegen-cli/${{ env.CODEGEN_VERSION }}/swagger-codegen-cli-${{ env.CODEGEN_VERSION }}.jar -O codegen-cli/${{ env.CODEGEN_NAME }}
+
+      - name: Build package
+        run: |
+          mvn package
+          cp target/*.jar codegen-cli/
+
+      - name: Generate stubs
+        run: |
+          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.SwaggerCodegen generate -l vality-erlang-client -i ${{ env.SPEC_URL }} -o erlang-client
+          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.SwaggerCodegen generate -l vality-erlang-server -i ${{ env.SPEC_URL }} -o erlang-server
+
+      - name: Upload server artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: erlang-server
+          path: erlang-server
+
+      - name: Upload client artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: erlang-client
+          path: erlang-client
+
+  build-client:
+    needs: [ generate ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download codegen cli
+        uses: actions/download-artifact@v2
+        with:
+          name: erlang-client
+
+      - name: Setup BEAM
+        uses: erlef/setup-beam@v1.10
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          rebar3-version: ${{ env.REBAR_VERSION }}
+
+      - name: Compile
+        run: rebar3 compile
+
+  build-server:
+    needs: [ generate ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download codegen cli
+        uses: actions/download-artifact@v2
+        with:
+          name: erlang-server
+
+      - name: Setup BEAM
+        uses: erlef/setup-beam@v1.10
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          rebar3-version: ${{ env.REBAR_VERSION }}
+
+      - name: Compile
+        run: rebar3 compile
