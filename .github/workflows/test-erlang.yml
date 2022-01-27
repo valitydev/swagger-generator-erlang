@@ -15,7 +15,7 @@ env:
   CODEGEN_VERSION: "2.4.25"
   CODEGEN_NAME: "swagger-codegen-cli.jar"
   ARTIFACT_NAME: "vality-erlang-codegen-swagger-codegen-1.0.0.jar"
-  SPEC_URL: "https://petstore.swagger.io/v2/swagger.json"
+  SPEC_PATH: "test/petstore-custom.yaml"
 
 jobs:
   generate:
@@ -36,8 +36,8 @@ jobs:
 
       - name: Generate stubs
         run: |
-          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.SwaggerCodegen generate -l vality-erlang-client -i ${{ env.SPEC_URL }} -o erlang-client
-          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.SwaggerCodegen generate -l vality-erlang-server -i ${{ env.SPEC_URL }} -o erlang-server
+          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.SwaggerCodegen generate -l vality-erlang-client -i ${{ env.SPEC_PATH }} -o erlang-client
+          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.SwaggerCodegen generate -l vality-erlang-server -i ${{ env.SPEC_PATH }} -o erlang-server
 
       - name: Upload server artifact
         uses: actions/upload-artifact@v2
