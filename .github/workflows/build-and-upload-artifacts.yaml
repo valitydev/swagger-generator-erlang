@@ -22,5 +22,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/*.jar
+          file: target/vality-erlang-codegen-swagger-codegen-1.0.0.jar
+          asset_name: swagger-generator-erlang-${{ github.ref_name }}.jar
           tag: ${{ github.ref }}
