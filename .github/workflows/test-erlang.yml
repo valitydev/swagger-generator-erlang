@@ -9,7 +9,6 @@ on:
     branches: [ '**' ]
 
 env:
-  JAVA_VERSION: 11
   OTP_VERSION: "24.2.0"
   REBAR_VERSION: "3.18"
   CODEGEN_VERSION: "2.4.25"
