@@ -26,7 +26,7 @@ jobs:
         run: |
           mkdir codegen-cli
           echo "DOWNLOADING ${{ env.CODEGEN_VERSION }}"
-          wget https://repo1.maven.org/maven2/io/swagger/codegen/v3/swagger-codegen-cli/${{ env.CODEGEN_VERSION }}/swagger-codegen-cli-${{ env.CODEGEN_VERSION }}.jar -O ${{ env.CODEGEN_NAME }}
+          wget https://repo1.maven.org/maven2/io/swagger/codegen/v3/swagger-codegen-cli/${{ env.CODEGEN_VERSION }}/swagger-codegen-cli-${{ env.CODEGEN_VERSION }}.jar -O codegen-cli/${{ env.CODEGEN_NAME }}
 
       - name: Build package
         run: |
