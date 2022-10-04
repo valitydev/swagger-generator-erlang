@@ -9,9 +9,9 @@ on:
     branches: [ '**' ]
 
 env:
-  OTP_VERSION: "24.2.0"
+  OTP_VERSION: "24"
   REBAR_VERSION: "3.18"
-  CODEGEN_VERSION: "2.4.25"
+  CODEGEN_VERSION: "3.0.35"
   CODEGEN_NAME: "swagger-codegen-cli.jar"
   ARTIFACT_NAME: "vality-erlang-codegen-swagger-codegen-1.0.0.jar"
   SPEC_PATH: "test/petstore-custom.yaml"
