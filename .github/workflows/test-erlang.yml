@@ -35,8 +35,8 @@ jobs:
 
       - name: Generate stubs
         run: |
-          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.SwaggerCodegen generate -l vality-erlang-client -i ${{ env.SPEC_PATH }} -o erlang-client
-          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.SwaggerCodegen generate -l vality-erlang-server -i ${{ env.SPEC_PATH }} -o erlang-server
+          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.v3.cli.SwaggerCodegen generate -l vality-erlang-client -i ${{ env.SPEC_PATH }} -o erlang-client
+          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.v3.cli.SwaggerCodegen generate -l vality-erlang-server -i ${{ env.SPEC_PATH }} -o erlang-server
 
       - name: Upload server artifact
         uses: actions/upload-artifact@v2
