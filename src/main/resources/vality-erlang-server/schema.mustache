@@ -17,8 +17,8 @@ get() ->
 enumerate_discriminator_children(Schema) ->
     try
         ComponentSchemas = maps:get(?SCHEMAS, maps:get(?COMPONENTS, Schema)),
-        Parents = enumerate_parents(Schemas),
-        ComponentSchemasFixed = maps:fold(fun correct_definition/3, Schemas, Parents),
+        Parents = enumerate_parents(ComponentSchemas),
+        ComponentSchemasFixed = maps:fold(fun correct_definition/3, ComponentSchemas, Parents),
         Schema#{?COMPONENTS => #{?SCHEMAS => ComponentSchemasFixed}}
     catch
         _:Error ->
