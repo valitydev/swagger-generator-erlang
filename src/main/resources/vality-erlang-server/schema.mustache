@@ -22,9 +22,7 @@ enumerate_discriminator_children(Schemas) ->
     catch
         _:Error ->
             handle_error(Error)
-    end;
-enumerate_discriminator_children(_) ->
-    handle_error(no_definitions).
+    end.
 
 -spec handle_error(_) ->
     no_return().
@@ -99,7 +97,7 @@ get_raw() ->
        \"Cat\": {
          \"description\": \"A representation of a cat\",
          \"allOf\": [
-           {\"$ref\": \"#/definitions/Pet\"},
+           {\"$ref\": \"#/components/schemas/Pet\"},
            {
              \"type\":       \"object\",
              \"properties\": {
@@ -117,7 +115,7 @@ get_raw() ->
        \"Dog\": {
          \"description\": \"A representation of a dog\",
          \"allOf\": [
-           {\"$ref\": \"#/definitions/Pet\"},
+           {\"$ref\": \"#/components/schemas/Pet\"},
            {
              \"type\":       \"object\",
              \"properties\": {
@@ -148,8 +146,8 @@ get_raw() ->
        },
        \"WildMix\": {
          \"allOf\": [
-           {\"$ref\": \"#/definitions/Pet\"},
-           {\"$ref\": \"#/definitions/Person\"}
+           {\"$ref\": \"#/components/schemas/Pet\"},
+           {\"$ref\": \"#/components/schemas/Person\"}
          ],
        },
        \"Dummy\": {
@@ -175,7 +173,7 @@ deep_get([K | Ks], M) ->
 -spec enumerate_discriminator_children_test() -> _.
 enumerate_discriminator_children_test() ->
     Schema      = jsx:decode(?SCHEMA, [return_maps]),
-    FixedSchema = enumerate_discriminator_children(Schema),
+    FixedSchema = enumerate_discriminator_children(maps:get(?SCHEMAS, maps:get(?COMPONENTS, Schema))),
     ?assertEqual(lists:sort([<<"Dog">>, <<"Cat">>, <<"WildMix">>]), get_enum(<<"Pet">>, <<"petType">>, FixedSchema)),
     ?assertEqual([<<"WildMix">>], get_enum(<<"Person">>,  <<"personType">>, FixedSchema)),
     ?assertEqual([],              get_enum(<<"Dummy">>,   <<"dummyType">>,  FixedSchema)).
