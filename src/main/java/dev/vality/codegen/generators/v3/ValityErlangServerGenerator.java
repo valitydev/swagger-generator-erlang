@@ -264,7 +264,7 @@ public class ValityErlangServerGenerator extends DefaultCodegenConfig {
 
     @Override
     public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
-        OpenAPI openAPI = (OpenAPI) objs.get("openapi");
+        OpenAPI openAPI = (OpenAPI) objs.get("openAPI");
         if (openAPI != null) {
             try {
                 objs.put("openapi-json", Json.mapper().writer(new ErlangJsonPrinter()).with(new ErlangJsonFactory())
