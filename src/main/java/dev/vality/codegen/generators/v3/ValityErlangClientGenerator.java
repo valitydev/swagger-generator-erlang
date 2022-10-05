@@ -2,7 +2,7 @@ package dev.vality.codegen.generators.v3;
 
 import io.swagger.codegen.v3.*;
 import io.swagger.codegen.v3.generators.DefaultCodegenConfig;
-
+import io.swagger.models.Swagger;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -58,7 +58,7 @@ public class ValityErlangClientGenerator extends DefaultCodegenConfig {
          * The generator
          * will use the resource stream to attempt to read the templates.
          */
-        embeddedTemplateDir = templateDir = "vality-erlang-client";
+        templateDir = "vality-erlang-client";
 
         /**
          * Reserved words. Override this with reserved words specific to your language
@@ -278,6 +278,12 @@ public class ValityErlangClientGenerator extends DefaultCodegenConfig {
         return super.postProcessSupportingFileData(objs);
     }
 
+    @Override
+    protected String getTemplateDir() {
+        return templateDir;
+    }
+
+    @Override
     public String getDefaultTemplateDir() {
         return templateDir;
     }

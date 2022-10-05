@@ -57,7 +57,7 @@ public class ValityErlangServerGenerator extends DefaultCodegenConfig {
          * The generator
          * will use the resource stream to attempt to read the templates.
          */
-        embeddedTemplateDir = templateDir = "vality-erlang-server";
+        templateDir = "vality-erlang-server";
 
         /**
          * Reserved words. Override this with reserved words specific to your language
@@ -310,6 +310,11 @@ public class ValityErlangServerGenerator extends DefaultCodegenConfig {
     public String escapeUnsafeCharacters(String input) {
         // ref: http://stackoverflow.com/a/30421295/677735
         return input.replace("-ifdef", "- if def").replace("-endif", "- end if");
+    }
+
+    @Override
+    protected String getTemplateDir() {
+        return templateDir;
     }
 
     @Override

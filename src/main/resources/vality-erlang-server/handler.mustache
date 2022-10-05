@@ -98,7 +98,7 @@ is_authorized(
             },
             {true, Req, State#state{context = NewContext}};
         {false, AuthHeader, Req} ->
-            {{false, AuthHeader}, Req, State}
+            { {false, AuthHeader}, Req, State}
     end;
   {{/isApiKey}}
 {{/authMethods}}
@@ -114,7 +114,7 @@ is_authorized(
 {{/hasAuthMethods}}
 {{/operation}}{{/operations}}
 is_authorized(Req, State) ->
-    {{false, <<"">>}, Req, State}.
+    { {false, <<"">>}, Req, State}.
 
 -spec content_types_accepted(Req :: cowboy_req:req(), State :: state()) ->
     {
@@ -124,9 +124,14 @@ is_authorized(Req, State) ->
     }.
 
 content_types_accepted(Req, State) ->
-    {[
-        {{<<"application">>, <<"json">>, [{<<"charset">>, <<"utf-8">>}]}, handle_request_json}
-    ], Req, State}.
+    {
+        [{
+            {<<"application">>, <<"json">>, [{<<"charset">>, <<"utf-8">>}]},
+            handle_request_json
+        }],
+        Req,
+        State
+    }.
 
 -spec valid_content_headers(Req :: cowboy_req:req(), State :: state()) ->
     {Value :: boolean(), Req :: cowboy_req:req(), State :: state()}.
@@ -152,9 +157,14 @@ valid_content_headers(Req, State) ->
     }.
 
 content_types_provided(Req, State) ->
-    {[
-        {{<<"application">>, <<"json">>, '*'}, handle_request_json}
-    ], Req, State}.
+    {
+        [{
+            {<<"application">>, <<"json">>, '*'},
+            handle_request_json
+        }],
+        Req,
+        State
+    }.
 
 -spec charsets_provided(Req :: cowboy_req:req(), State :: state()) ->
     {Charsets :: [binary()], Req :: cowboy_req:req(), State :: state()}.
@@ -256,7 +266,8 @@ validate_headers(_, Req) ->
 -spec get_request_spec(OperationID :: {{packageName}}:operation_id()) ->
     Spec :: {{packageName}}_handler_api:request_spec() | no_return().
 
-{{#operations}}{{#operation}}
+{{#operations}}
+{{#operation}}
 {{!
     NOTICE: Datatype definition was taken out of api.param_info partial since `items` context makes it impossible
     to check if we are currently in a list container. This information is required to get the data type from the correct
@@ -266,10 +277,12 @@ get_request_spec('{{operationId}}') ->
     [
         {{#allParams}}{{^isBodyParam}}{'{{baseName}}'{{/isBodyParam}}{{#isBodyParam}}{'{{dataType}}'{{/isBodyParam}}, #{
             source => {{#isQueryParam}}qs_val{{/isQueryParam}}{{#isPathParam}}binding{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}},
-            rules  => [{{^isBodyParam}}{{#isListContainer}}{list, '{{collectionFormat}}', {{#items}}[{{#datatype}}{type, '{{datatype}}'}, {{/datatype}}{{>api.param_info}}]{{/items}}}, {{/isListContainer}}{{^isListContainer}}{{#dataType}}{type, '{{dataType}}'}, {{/dataType}}{{/isListContainer}}{{>api.param_info}}, {{/isBodyParam}}{{#isBodyParam}}schema, {{/isBodyParam}}{required, {{#required}}true{{/required}}{{^required}}false{{/required}}}]
-        }}{{#hasMore}},
-        {{/hasMore}}{{/allParams}}
-    ]{{#hasMore}};{{/hasMore}}{{/operation}}.{{/operations}}
+            rules  => [{{^isBodyParam}}{{#isListContainer}}{list, '{{collectionFormat}}', {{#items}}[{{#datatype}}{type, '{{datatype}}'}, {{/datatype}}{{>api.param_info}}]{{/items}} }, {{/isListContainer}}{{^isListContainer}}{{#dataType}}{type, '{{dataType}}'}, {{/dataType}}{{/isListContainer}}{{>api.param_info}}, {{/isBodyParam}}{{#isBodyParam}}schema, {{/isBodyParam}}{required, {{#required}}true{{/required}}{{^required}}false{{/required}} }]
+        }}{{#hasMore}},{{/hasMore}}
+        {{/allParams}}
+    ]{{^@last}};{{/@last}}{{#@last}}.{{/@last}}
+{{/operation}}
+{{/operations}}
 
 -spec get_response_spec(OperationID :: {{packageName}}:operation_id(), Code :: cowboy:http_status()) ->
     Spec :: {{packageName}}_handler_api:response_spec() | no_return().
