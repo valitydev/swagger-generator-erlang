@@ -10,16 +10,15 @@
 
 -spec get() -> {{packageName}}:object().
 get() ->
-    Schemas = maps:get(?SCHEMAS, maps:get(?COMPONENTS, get_raw())),
-    ct_expand:term(enumerate_discriminator_children(#{?COMPONENTS => #{?SCHEMAS => Schemas}})).
+    ct_expand:term(enumerate_discriminator_children(maps:get(?SCHEMAS, maps:get(?COMPONENTS, get_raw())))).
 
 -spec enumerate_discriminator_children(Schema :: map()) ->
     Schema :: map() | no_return().
-enumerate_discriminator_children(Schema = #{?COMPONENTS := #{?SCHEMAS := Schemas}}) ->
+enumerate_discriminator_children(Schemas) ->
     try
         Parents = enumerate_parents(Schemas),
         SchemasFixed = maps:fold(fun correct_definition/3, Schemas, Parents),
-        Schema#{?COMPONENTS => #{?SCHEMAS => SchemasFixed}}
+        #{?COMPONENTS => #{?SCHEMAS => SchemasFixed}}
     catch
         _:Error ->
             handle_error(Error)
@@ -183,9 +182,8 @@ enumerate_discriminator_children_test() ->
 
 -spec get_test() -> _.
 get_test() ->
-    Schemas = maps:get(?SCHEMAS, maps:get(?COMPONENTS, get_raw())),
     ?assertEqual(
-       enumerate_discriminator_children(#{?COMPONENTS => #{?SCHEMAS => Schemas}}),
+       enumerate_discriminator_children(maps:get(?SCHEMAS, maps:get(?COMPONENTS, get_raw()))),
        ?MODULE:get()
     ).
 -endif.
