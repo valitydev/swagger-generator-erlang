@@ -5,39 +5,39 @@
 -export([get_raw/0]).
 -export([enumerate_discriminator_children/1]).
 
--define(DEFINITIONS, <<"definitions">>).
+-define(COMPONENTS, <<"components">>).
+-define(SCHEMAS, <<"schemas">>).
 
 -spec get() -> {{packageName}}:object().
 get() ->
-    ct_expand:term(enumerate_discriminator_children(maps:with([?DEFINITIONS], get_raw()))).
+    ct_expand:term(enumerate_discriminator_children(get_raw())).
 
 -spec enumerate_discriminator_children(Schema :: map()) ->
     Schema :: map() | no_return().
-enumerate_discriminator_children(Schema = #{?DEFINITIONS := Defs}) ->
+enumerate_discriminator_children(Schema) ->
     try
-        Parents = enumerate_parents(Defs),
-        DefsFixed = maps:fold(fun correct_definition/3, Defs, Parents),
-        Schema#{?DEFINITIONS := DefsFixed}
+        ComponentSchemas = maps:get(?SCHEMAS, maps:get(?COMPONENTS, Schema)),
+        Parents = enumerate_parents(ComponentSchemas),
+        ComponentSchemasFixed = maps:fold(fun correct_definition/3, ComponentSchemas, Parents),
+        Schema#{?COMPONENTS => #{?SCHEMAS => ComponentSchemasFixed}}
     catch
         _:Error ->
             handle_error(Error)
-    end;
-enumerate_discriminator_children(_) ->
-    handle_error(no_definitions).
+    end.
 
 -spec handle_error(_) ->
     no_return().
 handle_error(Error) ->
     erlang:error({schema_invalid, Error}).
 
-enumerate_parents(Definitions) ->
+enumerate_parents(Schemas) ->
     maps:fold(
         fun
             (Name, #{<<"allOf">> := AllOf}, AccIn) ->
                 lists:foldl(
                     fun
-                        (#{<<"$ref">> := <<"#/definitions/", Parent/binary>>}, Acc) ->
-                            Schema = maps:get(Parent, Definitions),
+                        (#{<<"$ref">> := <<"#/components/schemas/", Parent/binary>>}, Acc) ->
+                            Schema = maps:get(Parent, Schemas),
                             Discriminator = maps:get(<<"discriminator">>, Schema, undefined),
                             add_parent_child(Discriminator, Parent, Name, Acc);
                         (_Schema, Acc) ->
@@ -52,7 +52,7 @@ enumerate_parents(Definitions) ->
                 AccIn
         end,
         #{},
-        Definitions
+        Schemas
     ).
 
 add_parent_child(undefined, _Parent, _Child, Acc) ->
@@ -67,7 +67,7 @@ add_parent(_Parent, Acc) ->
 
 correct_definition(Parent, Children, Definitions) ->
     ParentSchema1 = maps:get(Parent, Definitions),
-    Discriminator = maps:get(<<"discriminator">>, ParentSchema1),
+    Discriminator = maps:get(<<"propertyName">>, maps:get(<<"discriminator">>, ParentSchema1)),
     ParentSchema2 = deep_put([<<"properties">>, Discriminator, <<"enum">>], Children, ParentSchema1),
     maps:put(Parent, ParentSchema2, Definitions).
 
@@ -78,16 +78,17 @@ deep_put([K | Ks], V, M) ->
 
 -spec get_raw() -> map().
 get_raw() ->
-    {{{swagger-json}}}.
+    {{{openapi-json}}}.
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 -define(SCHEMA,
-  <<"{\"definitions\": {
+  <<"{\"components\": {
+    \"schemas\": {
        \"Pet\": {
          \"type\":          \"object\",
-         \"discriminator\": \"petType\",
+         \"discriminator\": {\"propertyName\": \"petType\"},
          \"properties\": {
             \"name\":    {\"type\": \"string\"},
             \"petType\": {\"type\": \"string\"}
@@ -97,7 +98,7 @@ get_raw() ->
        \"Cat\": {
          \"description\": \"A representation of a cat\",
          \"allOf\": [
-           {\"$ref\": \"#/definitions/Pet\"},
+           {\"$ref\": \"#/components/schemas/Pet\"},
            {
              \"type\":       \"object\",
              \"properties\": {
@@ -115,7 +116,7 @@ get_raw() ->
        \"Dog\": {
          \"description\": \"A representation of a dog\",
          \"allOf\": [
-           {\"$ref\": \"#/definitions/Pet\"},
+           {\"$ref\": \"#/components/schemas/Pet\"},
            {
              \"type\":       \"object\",
              \"properties\": {
@@ -133,7 +134,7 @@ get_raw() ->
        },
        \"Person\": {
          \"type\":          \"object\",
-         \"discriminator\": \"personType\",
+         \"discriminator\": {\"propertyName\": \"personType\"},
          \"properties\": {
            \"name\": {\"type\": \"string\"},
            \"sex\": {
@@ -146,23 +147,23 @@ get_raw() ->
        },
        \"WildMix\": {
          \"allOf\": [
-           {\"$ref\": \"#/definitions/Pet\"},
-           {\"$ref\": \"#/definitions/Person\"}
+           {\"$ref\": \"#/components/schemas/Pet\"},
+           {\"$ref\": \"#/components/schemas/Person\"}
          ],
        },
        \"Dummy\": {
          \"type\":          \"object\",
-         \"discriminator\": \"dummyType\",
+         \"discriminator\": {\"propertyName\": \"dummyType\"},
          \"properties\": {
            \"name\":      {\"type\": \"string\"},
            \"dummyType\": {\"type\": \"string\"}
          },
          \"required\": [\"name\", \"dummyType\"]
        }
-     }}">>).
+     }}}">>).
 
 get_enum(Parent, Discr, Schema) ->
-    lists:sort(deep_get([?DEFINITIONS, Parent, <<"properties">>, Discr, <<"enum">>], Schema)).
+    lists:sort(deep_get([?COMPONENTS, ?SCHEMAS, Parent, <<"properties">>, Discr, <<"enum">>], Schema)).
 
 deep_get([K], M) ->
     maps:get(K, M);
@@ -181,7 +182,7 @@ enumerate_discriminator_children_test() ->
 -spec get_test() -> _.
 get_test() ->
     ?assertEqual(
-       enumerate_discriminator_children(maps:with([?DEFINITIONS], get_raw())),
+       enumerate_discriminator_children(get_raw()),
        ?MODULE:get()
     ).
 -endif.

@@ -9,9 +9,9 @@ on:
     branches: [ '**' ]
 
 env:
-  OTP_VERSION: "24.2.0"
+  OTP_VERSION: "24"
   REBAR_VERSION: "3.18"
-  CODEGEN_VERSION: "2.4.25"
+  CODEGEN_VERSION: "3.0.35"
   CODEGEN_NAME: "swagger-codegen-cli.jar"
   ARTIFACT_NAME: "vality-erlang-codegen-swagger-codegen-1.0.0.jar"
   SPEC_PATH: "test/petstore-custom.yaml"
@@ -26,7 +26,7 @@ jobs:
         run: |
           mkdir codegen-cli
           echo "DOWNLOADING ${{ env.CODEGEN_VERSION }}"
-          wget https://repo1.maven.org/maven2/io/swagger/swagger-codegen-cli/${{ env.CODEGEN_VERSION }}/swagger-codegen-cli-${{ env.CODEGEN_VERSION }}.jar -O codegen-cli/${{ env.CODEGEN_NAME }}
+          wget https://repo1.maven.org/maven2/io/swagger/codegen/v3/swagger-codegen-cli/${{ env.CODEGEN_VERSION }}/swagger-codegen-cli-${{ env.CODEGEN_VERSION }}.jar -O codegen-cli/${{ env.CODEGEN_NAME }}
 
       - name: Build package
         run: |
@@ -35,8 +35,10 @@ jobs:
 
       - name: Generate stubs
         run: |
-          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.SwaggerCodegen generate -l vality-erlang-client -i ${{ env.SPEC_PATH }} -o erlang-client
-          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.SwaggerCodegen generate -l vality-erlang-server -i ${{ env.SPEC_PATH }} -o erlang-server
+          mkdir erlang-client
+          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.v3.cli.SwaggerCodegen generate -l vality-erlang-client -i ${{ env.SPEC_PATH }} -o ./erlang-client
+          mkdir erlang-server
+          java -cp codegen-cli/${{ env.ARTIFACT_NAME }}:codegen-cli/${{ env.CODEGEN_NAME }} io.swagger.codegen.v3.cli.SwaggerCodegen generate -l vality-erlang-server -i ${{ env.SPEC_PATH }} -o ./erlang-server
 
       - name: Upload server artifact
         uses: actions/upload-artifact@v2
