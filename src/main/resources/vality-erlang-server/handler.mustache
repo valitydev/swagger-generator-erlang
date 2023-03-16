@@ -166,7 +166,7 @@ charsets_provided(Req, State) ->
     {Value :: boolean(), Req :: cowboy_req:req(), State :: state()}.
 
 malformed_request(Req, State) ->
-    {true, Req, State}.
+    {false, Req, State}.
 
 -spec allow_missing_post(Req :: cowboy_req:req(), State :: state()) ->
     {Value :: false, Req :: cowboy_req:req(), State :: state()}.
