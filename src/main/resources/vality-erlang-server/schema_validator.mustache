@@ -245,7 +245,8 @@ is_error_reason_unsupported(Error, _Value, _Attr) when element(1, Error) =:= sch
 
 log_validation_warning(Error, Value, Attr) ->
     Reason = map_error_reason(Error),
-    error_logger:warning_msg(
+    ok = logger:log(
+        warning,
         "Swagger validation failed, but it was ignored: ~p. Expected: ~p. Got: ~p.",
         [Reason, Attr, Value]
     ).

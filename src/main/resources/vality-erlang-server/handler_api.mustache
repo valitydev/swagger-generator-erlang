@@ -114,10 +114,7 @@ process_response(ok, {Code, Headers, undefined}, Req, _) ->
 process_response(ok, {Code, Headers, Body}, Req, _) ->
     cowboy_req:reply(Code, Headers, Body, Req);
 process_response(error, Message, Req, OperationID) ->
-    error_logger:info_msg(
-        "Unable to process request for ~p: ~ts",
-        [OperationID, Message]
-    ),
+    ok = logger:log(notice, "Unable to process request for ~p: ~ts", [OperationID, Message]),
     cowboy_req:reply(400, #{}, Message, Req).
 
 

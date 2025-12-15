@@ -39,7 +39,7 @@
 init(Req, {_Operations, LogicHandler, SwaggerHandlerOpts} = InitOpts) ->
     OperationID    = {{packageName}}_utils:get_operation_id(Req, InitOpts),
 
-    error_logger:info_msg("Attempt to process operation: ~p", [OperationID]),
+    ok = logger:log(info, "Attempt to process operation: ~p", [OperationID]),
 
     State = #state{
         operation_id  = OperationID,
@@ -239,6 +239,7 @@ encode_response(Resp) ->
 
 process_response(Status, Result, Req0, State = #state{operation_id = OperationID}) ->
     Req = {{packageName}}_handler_api:process_response(Status, Result, Req0, OperationID),
+    ok = logger:log(info, "Completed processing operation: ~p", [OperationID]),
     {stop, Req, State}.
 
 validate_headers(_, Req) ->
